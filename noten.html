@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Noten-Rechner Elektroniker EFZ</title>
+<meta name="theme-color" content="#070914">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎓</text></svg>">
+<style>
+:root{--bg:#070914;--bg2:#0e1226;--bg3:#161b36;--tx:#e8ecff;--mut:#8b93b8;--line:#252c52;--ok:#4ade80;--bad:#f87171;--gold:#fbbf24;--cy:#22d3ee}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:radial-gradient(ellipse at top,#101536 0%,#070914 60%) fixed;color:var(--tx);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;min-height:100%}
+.wrap{max-width:760px;margin:0 auto;padding:16px 14px calc(40px + env(safe-area-inset-bottom))}
+h1{font-size:22px;margin:6px 0 2px}
+h1 span{background:linear-gradient(90deg,#22d3ee,#a78bfa,#f472b6);-webkit-background-clip:text;background-clip:text;color:transparent}
+.sub{color:var(--mut);font-size:13px;margin-bottom:14px}
+.card{background:rgba(14,18,38,.92);border:1px solid var(--line);border-radius:16px;padding:14px;margin-bottom:12px}
+.card h2{margin:0 0 4px;font-size:16px;display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap}
+.card h2 .w{font-size:12px;color:var(--cy);font-weight:600;background:#0a2a33;border-radius:10px;padding:2px 9px}
+.hint{font-size:12px;color:var(--mut);margin:0 0 10px;line-height:1.45}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px}
+.f label{display:block;font-size:12px;color:var(--mut);margin-bottom:3px}
+.f input{width:100%;background:#0a0d24;border:1px solid var(--line);border-radius:10px;color:var(--tx);padding:10px;font:inherit;font-size:16px;outline:none;text-align:center}
+.f input:focus{border-color:#6366f1}
+.f input.bad{border-color:var(--bad);background:#2a0e14}
+.f input.filled{border-color:#3b4688}
+.res{margin-top:10px;font-size:14px;color:var(--mut);display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.res b{color:var(--tx);font-size:16px}
+.hero{text-align:center;border-color:#3b4688}
+.big{font-size:56px;font-weight:800;line-height:1;margin:6px 0;background:linear-gradient(90deg,#22d3ee,#a78bfa,#f472b6);-webkit-background-clip:text;background-clip:text;color:transparent}
+.badge{display:inline-block;border-radius:20px;padding:5px 14px;font-weight:700;font-size:14px}
+.badge.ok{background:#0f3a22;color:var(--ok)}
+.badge.bad{background:#3a0f16;color:var(--bad)}
+.badge.open{background:#1d2345;color:var(--mut)}
+.conds{margin-top:14px;text-align:left;display:grid;gap:6px}
+.cond{display:flex;justify-content:space-between;gap:10px;background:var(--bg3);border-radius:10px;padding:8px 12px;font-size:14px}
+.cond span:last-child{white-space:nowrap;font-weight:700}
+.cond.ok span:last-child{color:var(--ok)}
+.cond.bad span:last-child{color:var(--bad)}
+.cond.open span:last-child{color:var(--mut)}
+.zw{font-size:13px;color:var(--mut);margin-top:8px}
+.target{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:8px}
+select{background:#0a0d24;color:var(--tx);border:1px solid var(--line);border-radius:10px;padding:9px;font:inherit;font-size:15px}
+.need{background:var(--bg3);border-radius:12px;padding:12px;font-size:14px;line-height:1.5}
+.need b{color:var(--gold);font-size:18px}
+button{font:inherit;color:inherit;cursor:pointer;border:1px solid var(--line);background:var(--bg3);border-radius:10px;padding:9px 14px}
+button:hover{border-color:#5b66a8}
+.foot{font-size:12px;color:var(--mut);line-height:1.6}
+.foot a{color:var(--cy)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>🎓 <span>Noten-Rechner</span></h1>
+  <div class="sub">Elektroniker/in EFZ · Qualifikationsverfahren · Eingaben werden nur in deinem Browser gespeichert</div>
+
+  <div class="card hero">
+    <div class="sub" style="margin:0">Gesamtnote</div>
+    <div class="big" id="final">–</div>
+    <span class="badge open" id="badge">Noch nicht alle Noten erfasst</span>
+    <div class="zw" id="zw"></div>
+    <div class="conds" id="conds"></div>
+  </div>
+
+  <div class="card">
+    <h2>Teilprüfung <span class="w">25 %</span></h2>
+    <p class="hint">Ende 4. Semester. Mittelwert der drei Positionen, jede mit ganzer oder halber Note, auf eine Dezimalstelle gerundet.</p>
+    <div class="grid">
+      <div class="f"><label>Fertigungstechnik</label><input data-k="tp1" inputmode="decimal" placeholder="z. B. 5"></div>
+      <div class="f"><label>Schaltungs- &amp; Messtechnik</label><input data-k="tp2" inputmode="decimal" placeholder="z. B. 5.5"></div>
+      <div class="f"><label>Mikrocontrollertechnik</label><input data-k="tp3" inputmode="decimal" placeholder="z. B. 5"></div>
+    </div>
+    <div class="res"><span>Note Teilprüfung</span><b id="r_tp">–</b></div>
+  </div>
+
+  <div class="card">
+    <h2>Praktische Arbeit (IPA / VPA) <span class="w">25 %</span></h2>
+    <p class="hint">Note der individuellen praktischen Arbeit (oder vorgegebenen praktischen Arbeit) laut Notenblatt.</p>
+    <div class="grid"><div class="f"><label>Note praktische Arbeit</label><input data-k="pa" inputmode="decimal" placeholder="z. B. 5.4"></div></div>
+  </div>
+
+  <div class="card">
+    <h2>Berufskenntnisse <span class="w">15 %</span></h2>
+    <p class="hint">Schriftliche Abschlussprüfung (4 bis 5 Stunden).</p>
+    <div class="grid"><div class="f"><label>Note Berufskenntnisse</label><input data-k="bk" inputmode="decimal" placeholder="z. B. 4.9"></div></div>
+  </div>
+
+  <div class="card">
+    <h2>Allgemeinbildung (ABU) <span class="w">20 %</span></h2>
+    <p class="hint">Erfahrungsnote, Vertiefungsarbeit und Schlussprüfung zählen je ein Drittel. Das Mittel wird auf eine Dezimalstelle gerundet.</p>
+    <div class="grid">
+      <div class="f"><label>ABU-Erfahrungsnote</label><input data-k="abuE" inputmode="decimal" placeholder="z. B. 5"></div>
+      <div class="f"><label>Vertiefungsarbeit</label><input data-k="abuV" inputmode="decimal" placeholder="z. B. 5.2"></div>
+      <div class="f"><label>Schlussprüfung</label><input data-k="abuS" inputmode="decimal" placeholder="z. B. 4.8"></div>
+    </div>
+    <div class="res"><span>Note Allgemeinbildung</span><b id="r_abu">–</b></div>
+  </div>
+
+  <div class="card">
+    <h2>Erfahrungsnote Berufskunde <span class="w">15 %</span></h2>
+    <p class="hint">Mittel der acht Semesterzeugnisnoten des berufskundlichen Unterrichts (1. bis 8. Semester), gerundet auf eine ganze oder halbe Note.</p>
+    <div class="grid" id="sems"></div>
+    <div class="res"><span>Mittel <small id="r_en_mean"></small></span><b id="r_en">–</b></div>
+  </div>
+
+  <div class="card">
+    <h2>🎯 Zielnote</h2>
+    <p class="hint">Welche Durchschnittsnote brauchst du in den noch offenen Noten, um deine Wunschnote zu erreichen? (Rechnung ohne Zwischenrundungen, daher ein Richtwert.)</p>
+    <div class="target"><span>Ziel Gesamtnote:</span>
+      <select id="target"><option>4.0</option><option>4.5</option><option selected>5.0</option><option>5.5</option></select></div>
+    <div class="need" id="need">–</div>
+  </div>
+
+  <div class="card">
+    <button id="reset">🗑 Alle Eingaben löschen</button>
+  </div>
+
+  <div class="foot">
+    <b>Grundlage:</b> Verordnung des SBFI über die berufliche Grundbildung Elektronikerin/Elektroniker EFZ (Berufsnummer 46505, Stand 1. Januar 2016), Art. 17 und 18, die Ausführungsbestimmungen zur Teilprüfung (V2.0) und die Mindestvorschriften für die Allgemeinbildung. Das Fähigkeitszeugnis ist bestanden, wenn Teilprüfung, praktische Arbeit und das Mittel aus Berufskenntnissen und Erfahrungsnote je mindestens 4.0 sind und die Gesamtnote mindestens 4.0 beträgt.<br>
+    Dieser Rechner ist eine Orientierungshilfe. Massgebend ist immer dein offizielles Notenblatt des Kantons.
+  </div>
+</div>
+
+<script>
+(function(){
+'use strict';
+var KEY='efz_noten_v1';
+var $=function(s){return document.querySelector(s)};
+var inputs={},S={};
+try{S=JSON.parse(localStorage.getItem(KEY)||'{}')||{}}catch(e){S={}}
+
+function r1(x){return Math.round(x*10+1e-9)/10}
+function rh(x){return Math.round(x*2+1e-9)/2}
+function f1(x){return x===null?'–':x.toFixed(1)}
+function mean(a){return a.reduce(function(s,v){return s+v},0)/a.length}
+
+/* Semester-Felder */
+var sems=$('#sems');
+for(var i=1;i<=8;i++){
+ var d=document.createElement('div');d.className='f';
+ d.innerHTML='<label>'+i+'. Semester</label><input data-k="s'+i+'" inputmode="decimal" placeholder="–">';
+ sems.appendChild(d);
+}
+document.querySelectorAll('input[data-k]').forEach(function(el){
+ var k=el.dataset.k;inputs[k]=el;
+ if(S[k])el.value=S[k];
+ el.addEventListener('input',function(){S[k]=el.value;try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}calc()});
+});
+
+function val(k){
+ var el=inputs[k],t=(el.value||'').trim().replace(',','.');
+ el.classList.remove('bad','filled');
+ if(t==='')return null;
+ var v=parseFloat(t);
+ if(isNaN(v)||v<1||v>6){el.classList.add('bad');return null}
+ el.classList.add('filled');return v;
+}
+function vals(keys){return keys.map(val)}
+function done(a){return a.every(function(v){return v!==null})}
+
+function calc(){
+ var tpV=vals(['tp1','tp2','tp3']),pa=val('pa'),bk=val('bk'),abuV=vals(['abuE','abuV','abuS']);
+ var sk=[1,2,3,4,5,6,7,8].map(function(i){return 's'+i}),enV=vals(sk);
+ var tp=done(tpV)?r1(mean(tpV)):null;
+ var abu=done(abuV)?r1(mean(abuV)):null;
+ var enKnown=enV.filter(function(v){return v!==null});
+ var en=done(enV)?rh(mean(enV)):null;
+ $('#r_tp').textContent=f1(tp);
+ $('#r_abu').textContent=f1(abu);
+ $('#r_en').textContent=en===null?'–':en.toFixed(1);
+ $('#r_en_mean').textContent=enKnown.length?'('+enKnown.length+' von 8 erfasst: '+mean(enKnown).toFixed(2)+')':'';
+
+ var all=tp!==null&&pa!==null&&bk!==null&&abu!==null&&en!==null;
+ var fin=all?r1((25*tp+25*pa+15*bk+20*abu+15*en)/100):null;
+ $('#final').textContent=f1(fin);
+
+ var bkEn=(bk!==null&&en!==null)?(bk+en)/2:null;
+ var conds=[
+  ['Teilprüfung mindestens 4.0',tp,tp!==null?f1(tp):'–',tp!==null&&tp>=4],
+  ['Praktische Arbeit mindestens 4.0',pa,pa!==null?f1(pa):'–',pa!==null&&pa>=4],
+  ['Mittel Berufskenntnisse + Erfahrungsnote mind. 4.0',bkEn,bkEn!==null?bkEn.toFixed(2):'–',bkEn!==null&&bkEn>=4],
+  ['Gesamtnote mindestens 4.0',fin,f1(fin),fin!==null&&fin>=4]
+ ];
+ var box=$('#conds');box.innerHTML='';
+ var anyBad=false,allOk=true;
+ conds.forEach(function(c){
+  var known=c[1]!==null,st=!known?'open':(c[3]?'ok':'bad');
+  if(st==='bad')anyBad=true;if(st!=='ok')allOk=false;
+  var d=document.createElement('div');d.className='cond '+st;
+  var a=document.createElement('span'),b=document.createElement('span');
+  a.textContent=c[0];b.textContent=(st==='ok'?'✓ ':st==='bad'?'✗ ':'')+c[2];
+  d.appendChild(a);d.appendChild(b);box.appendChild(d);
+ });
+ var badge=$('#badge');
+ if(anyBad){badge.className='badge bad';badge.textContent='Nicht bestanden (Bedingung verfehlt)'}
+ else if(allOk){badge.className='badge ok';badge.textContent='Bestanden 🎉'}
+ else{badge.className='badge open';badge.textContent='Noch nicht alle Noten erfasst'}
+
+ /* Blätter mit effektiven Gewichten in Prozent */
+ var leaves=[];
+ tpV.forEach(function(v){leaves.push([25/3,v])});
+ leaves.push([25,pa]);leaves.push([15,bk]);
+ abuV.forEach(function(v){leaves.push([20/3,v])});
+ enV.forEach(function(v){leaves.push([15/8,v])});
+ var kw=0,ks=0,uw=0,un=0;
+ leaves.forEach(function(l){if(l[1]===null){uw+=l[0];un++}else{kw+=l[0];ks+=l[0]*l[1]}});
+ var zw=$('#zw');
+ zw.textContent=(kw>0&&uw>0)?'Zwischenstand aus den erfassten Noten: '+(ks/kw).toFixed(2)+' ('+Math.round(kw)+' % der Gesamtnote erfasst)':'';
+
+ var T=parseFloat($('#target').value),need=$('#need');
+ if(kw===0){need.textContent='Trage mindestens eine Note ein.';return}
+ if(uw<1e-9){
+  need.innerHTML='Alle Noten sind erfasst. Deine Gesamtnote ist <b>'+f1(fin)+'</b>'+(fin!==null&&fin>=T?' – Ziel '+T.toFixed(1)+' erreicht ✅':' – Ziel '+T.toFixed(1)+' nicht erreicht.');
+  return;
+ }
+ var x=(T*100-ks)/uw;
+ var txt='Offen sind noch <b>'+un+'</b> Einzelnoten ('+Math.round(uw)+' % der Gesamtnote). ';
+ if(x>6.0001)txt+='Für <b>'+T.toFixed(1)+'</b> reicht selbst eine 6 in allen offenen Noten nicht mehr aus.';
+ else if(x<=1)txt+='Das Ziel <b>'+T.toFixed(1)+'</b> ist rechnerisch schon sicher.';
+ else txt+='Für eine Gesamtnote von <b>'+T.toFixed(1)+'</b> brauchst du im Schnitt <b>'+(Math.ceil(x*10-1e-9)/10).toFixed(1)+'</b> in den offenen Noten.';
+ txt+='<br><small style="color:var(--mut)">Denk daran: Teilprüfung, praktische Arbeit und das Mittel aus Berufskenntnissen und Erfahrungsnote müssen zusätzlich je mindestens 4.0 sein.</small>';
+ need.innerHTML=txt;
+}
+$('#target').addEventListener('change',calc);
+$('#reset').addEventListener('click',function(){
+ if(!confirm('Alle eingegebenen Noten löschen?'))return;
+ S={};try{localStorage.removeItem(KEY)}catch(e){}
+ Object.keys(inputs).forEach(function(k){inputs[k].value=''});calc();
+});
+calc();
+})();
+</script>
+</body>
+</html>
